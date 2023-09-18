@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysApartmentMapper">
+    
+    <resultMap type="SysApartment" id="SysApartmentResult">
+        <result property="apartmentId"    column="apartment_id"    />
+        <result property="buildingId"    column="building_id"    />
+        <result property="apartmentName"    column="apartment_name"    />
+        <result property="apartmentPrice"    column="apartment_price"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectSysApartmentVo">
+        select apartment_id, building_id, apartment_name, apartment_price, status, create_by, create_time, update_time, remark from sys_apartment
+    </sql>
+
+    <select id="selectSysApartmentList" parameterType="SysApartment" resultMap="SysApartmentResult">
+        <include refid="selectSysApartmentVo"/>
+        <where>  
+            <if test="buildingId != null "> and building_id = #{buildingId}</if>
+            <if test="apartmentName != null  and apartmentName != ''"> and apartment_name like concat('%', #{apartmentName}, '%')</if>
+            <if test="apartmentPrice != null "> and apartment_price = #{apartmentPrice}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectSysApartmentByApartmentId" parameterType="Long" resultMap="SysApartmentResult">
+        <include refid="selectSysApartmentVo"/>
+        where apartment_id = #{apartmentId}
+    </select>
+        
+    <insert id="insertSysApartment" parameterType="SysApartment">
+        insert into sys_apartment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="apartmentId != null">apartment_id,</if>
+            <if test="buildingId != null">building_id,</if>
+            <if test="apartmentName != null">apartment_name,</if>
+            <if test="apartmentPrice != null">apartment_price,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="apartmentId != null">#{apartmentId},</if>
+            <if test="buildingId != null">#{buildingId},</if>
+            <if test="apartmentName != null">#{apartmentName},</if>
+            <if test="apartmentPrice != null">#{apartmentPrice},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysApartment" parameterType="SysApartment">
+        update sys_apartment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="buildingId != null">building_id = #{buildingId},</if>
+            <if test="apartmentName != null">apartment_name = #{apartmentName},</if>
+            <if test="apartmentPrice != null">apartment_price = #{apartmentPrice},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where apartment_id = #{apartmentId}
+    </update>
+
+    <delete id="deleteSysApartmentByApartmentId" parameterType="Long">
+        delete from sys_apartment where apartment_id = #{apartmentId}
+    </delete>
+
+    <delete id="deleteSysApartmentByApartmentIds" parameterType="String">
+        delete from sys_apartment where apartment_id in 
+        <foreach item="apartmentId" collection="array" open="(" separator="," close=")">
+            #{apartmentId}
+        </foreach>
+    </delete>
+</mapper>
