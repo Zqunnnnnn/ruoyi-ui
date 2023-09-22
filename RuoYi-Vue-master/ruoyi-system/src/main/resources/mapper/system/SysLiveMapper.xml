@@ -3,10 +3,10 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.SysLiveMapper">
-    
+
     <resultMap type="SysLive" id="SysLiveResult">
         <result property="liveId"    column="live_id"    />
-        <result property="apartemntId"    column="apartemnt_id"    />
+        <result property="apartmentId"    column="apartment_id"    />
         <result property="userId"    column="user_id"    />
         <result property="startTime"    column="start_time"    />
         <result property="endTime"    column="end_time"    />
@@ -14,36 +14,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectSysLiveVo">
-        select live_id, apartemnt_id, user_id, start_time, end_time, total_pay from sys_live
+        select live_id, apartment_id, user_id, start_time, end_time, total_pay from sys_live
     </sql>
 
     <select id="selectSysLiveList" parameterType="SysLive" resultMap="SysLiveResult">
         <include refid="selectSysLiveVo"/>
-        <where>  
-            <if test="apartemntId != null "> and apartemnt_id = #{apartemntId}</if>
+        <where>
+            <if test="apartmentId != null "> and apartment_id = #{apartmentId}</if>
             <if test="userId != null "> and user_id = #{userId}</if>
             <if test="startTime != null "> and start_time = #{startTime}</if>
             <if test="endTime != null "> and end_time = #{endTime}</if>
             <if test="totalPay != null  and totalPay != ''"> and total_pay = #{totalPay}</if>
         </where>
     </select>
-    
+
     <select id="selectSysLiveByLiveId" parameterType="Long" resultMap="SysLiveResult">
         <include refid="selectSysLiveVo"/>
         where live_id = #{liveId}
     </select>
-        
+
     <insert id="insertSysLive" parameterType="SysLive" useGeneratedKeys="true" keyProperty="liveId">
         insert into sys_live
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="apartemntId != null">apartemnt_id,</if>
+            <if test="apartmentId != null">apartment_id,</if>
             <if test="userId != null">user_id,</if>
             <if test="startTime != null">start_time,</if>
             <if test="endTime != null">end_time,</if>
             <if test="totalPay != null">total_pay,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="apartemntId != null">#{apartemntId},</if>
+            <if test="apartmentId != null">#{apartmentId},</if>
             <if test="userId != null">#{userId},</if>
             <if test="startTime != null">#{startTime},</if>
             <if test="endTime != null">#{endTime},</if>
@@ -54,7 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateSysLive" parameterType="SysLive">
         update sys_live
         <trim prefix="SET" suffixOverrides=",">
-            <if test="apartemntId != null">apartemnt_id = #{apartemntId},</if>
+            <if test="apartmentId != null">apartment_id = #{apartmentId},</if>
             <if test="userId != null">user_id = #{userId},</if>
             <if test="startTime != null">start_time = #{startTime},</if>
             <if test="endTime != null">end_time = #{endTime},</if>
@@ -68,7 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteSysLiveByLiveIds" parameterType="String">
-        delete from sys_live where live_id in 
+        delete from sys_live where live_id in
         <foreach item="liveId" collection="array" open="(" separator="," close=")">
             #{liveId}
         </foreach>

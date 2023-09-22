@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.core.domain.entity.SysRole;
+import com.ruoyi.framework.web.domain.server.Sys;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +36,18 @@ public class SysApartmentController extends BaseController
 {
     @Autowired
     private ISysApartmentService sysApartmentService;
-
+    /**
+     * 导出公寓管理列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:apartment:export')")
+    @Log(title = "公寓管理", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, SysApartment sysApartment)
+    {
+        List<SysApartment> list = sysApartmentService.selectSysApartmentList(sysApartment);
+        ExcelUtil<SysApartment> util = new ExcelUtil<SysApartment>(SysApartment.class);
+        util.exportExcel(response, list, "公寓管理数据");
+    }
     /**
      * 查询公寓管理列表
      */
@@ -49,16 +61,14 @@ public class SysApartmentController extends BaseController
     }
 
     /**
-     * 导出公寓管理列表
+     * 查询房间号
+     * @param buildingId
+     * @return
      */
-    @PreAuthorize("@ss.hasPermi('system:apartment:export')")
-    @Log(title = "公寓管理", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
-    public void export(HttpServletResponse response, SysApartment sysApartment)
-    {
-        List<SysApartment> list = sysApartmentService.selectSysApartmentList(sysApartment);
-        ExcelUtil<SysApartment> util = new ExcelUtil<SysApartment>(SysApartment.class);
-        util.exportExcel(response, list, "公寓管理数据");
+    @PreAuthorize("@ss.hasPermi('system:apartment:query')")
+    @GetMapping(value = "/build/{buildingId}")
+    public AjaxResult getApartment(@PathVariable("buildingId") Long buildingId){
+        return success(sysApartmentService.selectApartmentByBuildingId(buildingId));
     }
 
     /**
@@ -101,6 +111,7 @@ public class SysApartmentController extends BaseController
 	@DeleteMapping("/{apartmentIds}")
     public AjaxResult remove(@PathVariable Long[] apartmentIds)
     {
+
         return toAjax(sysApartmentService.deleteSysApartmentByApartmentIds(apartmentIds));
     }
 

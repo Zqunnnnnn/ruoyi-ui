@@ -1,15 +1,15 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="房间号" prop="apartemntId">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="100px">
+      <el-form-item label="入住房间号" prop="apartmentId">
         <el-input
-          v-model="queryParams.apartemntId"
+          v-model="queryParams.apartmentId"
           placeholder="请输入入住房间号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="用户号" prop="userId">
+      <el-form-item label="入住用户号" prop="userId">
         <el-input
           v-model="queryParams.userId"
           placeholder="请输入入住用户号"
@@ -19,18 +19,18 @@
       </el-form-item>
       <el-form-item label="开始时间" prop="startTime">
         <el-date-picker clearable
-          v-model="queryParams.startTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择开始时间">
+                        v-model="queryParams.startTime"
+                        type="date"
+                        value-format="yyyy-MM-dd"
+                        placeholder="请选择开始时间">
         </el-date-picker>
       </el-form-item>
       <el-form-item label="结束时间" prop="endTime">
         <el-date-picker clearable
-          v-model="queryParams.endTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择结束时间">
+                        v-model="queryParams.endTime"
+                        type="date"
+                        value-format="yyyy-MM-dd"
+                        placeholder="请选择结束时间">
         </el-date-picker>
       </el-form-item>
       <el-form-item label="支付金额" prop="totalPay">
@@ -47,18 +47,18 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+    <el-row :gutter="20" class="mb8">
+      <el-col :span="1.8">
         <el-button
           type="primary"
           plain
           icon="el-icon-plus"
           size="mini"
-          @click="handleAdd"
+          @click="handleAdd(1,2,3)"
           v-hasPermi="['system:live:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <el-col :span="1.8">
         <el-button
           type="success"
           plain
@@ -69,7 +69,7 @@
           v-hasPermi="['system:live:edit']"
         >修改</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <el-col :span="1.8">
         <el-button
           type="danger"
           plain
@@ -80,7 +80,7 @@
           v-hasPermi="['system:live:remove']"
         >删除</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <el-col :span="1.8">
         <el-button
           type="warning"
           plain
@@ -96,7 +96,7 @@
     <el-table v-loading="loading" :data="liveList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="入住单号" align="center" prop="liveId" />
-      <el-table-column label="入住房间号" align="center" prop="apartemntId" />
+      <el-table-column label="入住公寓号" align="center" prop="apartmentId" />
       <el-table-column label="入住用户号" align="center" prop="userId" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
@@ -140,30 +140,33 @@
     <!-- 添加或修改入住管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="入住房间号" prop="apartemntId">
-          <el-input v-model="form.apartemntId" placeholder="请输入入住房间号" />
-        </el-form-item>
+
         <el-form-item label="入住用户号" prop="userId">
           <el-input v-model="form.userId" placeholder="请输入入住用户号" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker clearable
-            v-model="form.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择开始时间">
+                          v-model="form.startTime"
+                          type="date"
+                          value-format="yyyy-MM-dd"
+                          placeholder="请选择开始时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
           <el-date-picker clearable
-            v-model="form.endTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择结束时间">
+                          v-model="form.endTime"
+                          type="date"
+                          value-format="yyyy-MM-dd"
+                          placeholder="请选择结束时间"
+                          blur="handlePay()"
+          >
           </el-date-picker>
         </el-form-item>
+        <el-form-item label="入住房间号" prop="apartmentId">
+          <el-input v-model="form.apartmentId" placeholder="请输入入住房间号" @change="findRoomInfo(form.apartmentId)"/>
+        </el-form-item>
         <el-form-item label="支付金额" prop="totalPay">
-          <el-input v-model="form.totalPay" placeholder="请输入支付金额" />
+          <el-input v-model="form.totalPay"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -176,11 +179,13 @@
 
 <script>
 import { listLive, getLive, delLive, addLive, updateLive } from "@/api/system/live";
+import {getApartment, getApartment2} from "@/api/system/apartment";
 
 export default {
   name: "Live",
   data() {
     return {
+      roomPrice: {},
       // 遮罩层
       loading: true,
       // 选中数组
@@ -199,21 +204,24 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      //公寓单价
+      price:[],
       // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        apartemntId: null,
+        apartmentId: null,
         userId: null,
         startTime: null,
         endTime: null,
         totalPay: null
       },
       // 表单参数
-      form: {},
+      form: {
+      },
       // 表单校验
       rules: {
-        apartemntId: [
+        apartmentId: [
           { required: true, message: "入住房间号不能为空", trigger: "blur" }
         ],
         userId: [
@@ -224,16 +232,24 @@ export default {
   },
   created() {
     this.getList();
+
   },
   methods: {
-    /** 查询入住管理列表 */
-    getList() {
-      this.loading = true;
-      listLive(this.queryParams).then(response => {
-        this.liveList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
+  //获取总价格
+    findRoomInfo(roomId){
+      console.log(roomId);
+      getApartment(roomId).then(response=>{
+        this.roomPrice=response.data.apartmentPrice;
+        console.log(this.roomPrice);
+      })
+      const startTime = this.form.startTime;
+      const endTime = this.form.endTime;
+      const price = this.roomPrice;
+      if(startTime && endTime && price){
+        const days = (new Date(endTime) - new Date(startTime)) / (24 * 60 * 60 * 1000);
+        const totalPay = days*price;
+        this.form.totalPay = totalPay;
+      }
     },
     // 取消按钮
     cancel() {
@@ -244,7 +260,7 @@ export default {
     reset() {
       this.form = {
         liveId: null,
-        apartemntId: null,
+        apartmentId: null,
         userId: null,
         startTime: null,
         endTime: null,
@@ -269,11 +285,15 @@ export default {
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
-    handleAdd() {
+    handleAdd(flag) {
       this.reset();
       this.open = true;
       this.title = "添加入住管理";
+      getApartment2(flag).then(response=>{
+        this.nowApartmentId=response.data;
+      })
     },
+
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
@@ -284,6 +304,16 @@ export default {
         this.title = "修改入住管理";
       });
     },
+    /** 查询入住管理列表 */
+    getList() {
+      this.loading = true;
+      listLive(this.queryParams).then(response => {
+        this.liveList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {

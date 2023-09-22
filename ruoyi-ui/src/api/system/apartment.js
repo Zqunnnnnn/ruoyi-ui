@@ -17,6 +17,13 @@ export function getApartment(apartmentId) {
   })
 }
 
+export function getApartment2(buildingId){
+  return request({
+    url: '/system/apartment/build/' + buildingId,
+    method:'get'
+  })
+}
+
 // 新增公寓管理
 export function addApartment(data) {
   return request({

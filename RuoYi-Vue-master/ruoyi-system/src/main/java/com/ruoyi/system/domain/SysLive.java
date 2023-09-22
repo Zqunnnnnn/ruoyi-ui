@@ -22,7 +22,7 @@ public class SysLive extends BaseEntity
 
     /** 入住房间号 */
     @Excel(name = "入住房间号")
-    private Long apartemntId;
+    private Long apartmentId;
 
     /** 入住用户号 */
     @Excel(name = "入住用户号")
@@ -51,14 +51,14 @@ public class SysLive extends BaseEntity
     {
         return liveId;
     }
-    public void setApartemntId(Long apartemntId) 
+    public void setapartmentId(Long apartmentId) 
     {
-        this.apartemntId = apartemntId;
+        this.apartmentId = apartmentId;
     }
 
-    public Long getApartemntId() 
+    public Long getapartmentId() 
     {
-        return apartemntId;
+        return apartmentId;
     }
     public void setUserId(Long userId) 
     {
@@ -101,7 +101,7 @@ public class SysLive extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("liveId", getLiveId())
-            .append("apartemntId", getApartemntId())
+            .append("apartmentId", getapartmentId())
             .append("userId", getUserId())
             .append("startTime", getStartTime())
             .append("endTime", getEndTime())

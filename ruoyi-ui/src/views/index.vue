@@ -54,36 +54,70 @@
         </el-row>
         <el-row>
           <el-col :span="6">
-            <h4>经济房</h4>
+            <el-row>
+              <el-button
+                round
+                size="mini"
+                @click="handleLive(1)"
+                v-hasPermi="['system:live:add']"
+              >经济房</el-button>
+            </el-row>
+            <el-row>
+              <h3>   </h3>
+            </el-row>
+
+              <ul>
+                <li>价格适中亲民</li>
+                <li>空间适中舒服</li>
+                <li>现代装修舒服</li>
+                <li>适合小家舒服</li>
+                <li>...</li>
+              </ul>
+
+          </el-col>
+          <el-col :span="6">
+            <el-row>
+              <el-button
+                round
+                size="mini"
+                @click="handleLive(2)"
+                v-hasPermi="['system:live:add']"
+              >精品房</el-button>
+            </el-row>
+            <el-row>
+              <h3>   </h3>
+            </el-row>
+
             <ul>
-              <li>价格实惠</li>
-              <li>价格实惠</li>
-              <li>简约装修</li>
-              <li>适合单身人士</li>
+              <li>价格适中舒服</li>
+              <li>空间适中舒服</li>
+              <li>现代装修舒服</li>
+              <li>适合小家舒服</li>
               <li>...</li>
             </ul>
           </el-col>
           <el-col :span="6">
-            <h4>商品房</h4>
+            <el-row>
+              <el-button
+                round
+                size="mini"
+                @click="handleLive(3)"
+                v-hasPermi="['system:live:add']"
+              >豪华套房</el-button>
+            </el-row>
+            <el-row>
+              <h3>   </h3>
+            </el-row>
             <ul>
-              <li>价格适中</li>
-              <li>空间适中</li>
-              <li>现代装修</li>
-              <li>适合小家</li>
-              <li>...</li>
-            </ul>
-          </el-col>
-          <el-col :span="6">
-            <h4>豪华套房</h4>
-            <ul>
-              <li>空间宽敞</li>
-              <li>服务一流</li>
-              <li>奢华装修</li>
-              <li>设施顶级</li>
+              <li>空间宽敞舒服</li>
+              <li>服务一流舒服</li>
+              <li>奢华装修舒服</li>
+              <li>设施顶级舒服</li>
               <li>...</li>
             </ul>
           </el-col>
         </el-row>
+
       </el-col>
     </el-row>
     <el-divider />
@@ -144,22 +178,168 @@
         </el-card>
       </el-col>
     </el-row>
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="公寓号" prop="apartmentId">
+          <el-select v-model="form.apartmentId" :disabled="isTopNode">
+            <el-option
+              v-for="item in nowApartmentId"
+              :key="item.apartmentId"
+              :label="item.apartmentName"
+              :value="item.apartmentId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="用户号" prop="userId">
+          <el-input v-model="form.userId" placeholder="请输入用户号" />
+        </el-form-item>
+        <el-form-item label="开始时间" prop="startTime">
+          <el-date-picker
+            v-model="form.startTime"
+            type="date"
+            placeholder="选择日期">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endTime">
+          <el-date-picker
+            v-model="form.endTime"
+            type="date"
+            placeholder="选择日期">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="公寓号" prop="apartmentId">
+          <el-select v-model="form.apartmentId" :disabled="isTopNode" @change="findRoomInfo">
+            <el-option
+              v-for="item in nowApartmentId"
+              :key="item.apartmentId"
+              :label="item.apartmentName"
+              :value="item.apartmentId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="总金额" prop="totalPay">
+          <el-input v-model="form.totalPay" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import {addLive, listLive, updateLive} from "@/api/system/live";
+import {getApartment, getApartment2} from "@/api/system/apartment";
+
 export default {
   name: "Index",
   data() {
     return {
+      form: {},
+      loading: true,
+      //是否禁用下拉框
+      isTopNode:false,
+      liveList: [],
+      total: 0,
+      title: "",
+      open: false,
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        apartmentId: null,
+        userId: null,
+        startTime: null,
+        endTime: null,
+        totalPay: null,
+      },
+      //筛选后的公寓号
+      nowApartmentId:{},
       // 版本号
-      version: "3.8.6"
+      version: "3.8.6",
+      rules:{
+        apartmentId:[
+          {required:true,message:"apartmentId can't be null",trigger:"blur"}
+        ],
+        userId:[
+          {required:true,message:"userId can't be null",trigger:"blur"}
+        ],
+        startTime:[
+          {required:true,message:"startTime can't be null",trigger:"blur"}
+        ],
+        endTime:[
+          {required:true,message:"endTime can't be null",trigger:"blur"}
+        ],
+        totalPay:[
+          {required:true,message:"totalPay can't be null",trigger:"blur"}
+        ]
+      }
     };
   },
   methods: {
     goTarget(href) {
       window.open(href, "_blank");
-    }
+    },
+    //获取总价格
+    findRoomInfo(roomId){
+      getApartment(roomId).then(response=>{
+        this.roomPrice=response.data.apartmentPrice;
+      })
+      const startTime = this.form.startTime;
+      const endTime = this.form.endTime;
+      const price = this.roomPrice;
+      if(startTime && endTime && price){
+        const days = (new Date(endTime) - new Date(startTime)) / (24 * 60 * 60 * 1000);
+        const totalPay = days*price;
+        this.form.totalPay = totalPay;
+      }
+    },
+    handleLive(flag) {
+      this.reset();
+      this.open = true;
+      this.title = "申请入住";
+      //axios  获取所有的经济房编号，放入一个数组
+      getApartment2(flag).then(response=>{
+        this.nowApartmentId=response.data;
+      })
+    },
+    reset() {
+      this.form = {
+        apartmentId: undefined,
+        userId: undefined,
+        startTime: undefined,
+        endTime: undefined,
+        totalPay: undefined
+      };
+      this.resetForm("form");
+    },
+    /**
+     * 获取居住信息
+     */
+    getList() {
+      this.loading = true;
+      listLive(this.queryParams).then(response => {
+        this.liveList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    cancel() {
+      this.open = false;
+      this.reset();
+    },
+    submitForm: function() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          addLive(this.form).then(response => {
+            this.$modal.msgSuccess("成功入住");
+            this.open = false;
+            this.getList();
+          });
+        }
+      });
+    },
   }
 };
 </script>

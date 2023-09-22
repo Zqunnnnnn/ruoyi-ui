@@ -14,7 +14,7 @@ export let isRelogin = { show: false };
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
-  // axios中请求配置有baseURL选项，表示请求URL公共部分
+  // axios中请求配置有baseURL选项，表示请求URL公共部分.通过将基础URL存储在环境变量中，可以方便地在不同的开发或部署环境中进行配置，而不需要修改源代码。
   baseURL: process.env.VUE_APP_BASE_API,
   // 超时
   timeout: 10000
